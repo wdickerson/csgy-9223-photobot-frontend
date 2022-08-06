@@ -13,10 +13,7 @@ phases:
         - npm run build
      
 artifacts:
-  # include all files required to run application
-  # notably excluded is node_modules, as this will cause overwrite error on deploy
+  # define files to send to S3
   files:
-    - public/**/*
-    - src/**/*
-    - package.json
-    - package-lock.json
+    - '**/*'
+  base-directory: build
