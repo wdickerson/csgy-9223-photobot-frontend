@@ -78,7 +78,7 @@ function App() {
       <header className="App-header">
         <img src={logo} className="App-logo" alt="logo" />
         <p>
-          Store and access your photos.
+          Store and access your photos. Via CodePipeline!!
         </p>
       </header>
       <h3>Upload a photo</h3>
