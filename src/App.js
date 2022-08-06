@@ -95,7 +95,7 @@ function App() {
         <button type="submit">Upload</button>
       </form>
 
-      <h3>-OR- Search for a post tag (ie, "python")</h3>
+      <h3>-OR- Search for a label (ie, "dog")</h3>
       <form onSubmit={handleSearchPhotos}>
         <label>
           Search by label:&nbsp;
