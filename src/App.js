@@ -2,7 +2,7 @@ import logo from './logo.svg';
 import './App.css';
 import { useState } from 'react'
 
-const API_DOMAIN = 'ybouz7fmod.execute-api.us-east-1.amazonaws.com/dev';
+const API_DOMAIN = '5z97fmbqfb.execute-api.us-east-1.amazonaws.com/dev';
 
 function App() {
   const [customLabelText, setCustomLabelText] = useState('');
