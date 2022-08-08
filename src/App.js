@@ -2,7 +2,7 @@ import logo from './logo.svg';
 import './App.css';
 import { useState } from 'react'
 
-const API_DOMAIN = '5z97fmbqfb.execute-api.us-east-1.amazonaws.com/dev';
+const API_HOST = process.env.REACT_APP_PHOTOBOT_API_HOST;
 
 function App() {
   const [customLabelText, setCustomLabelText] = useState('');
@@ -11,7 +11,7 @@ function App() {
   const [fetchedPhotos, setFetchedPhotos] = useState([]);
 
   const uploadPhoto = () => {
-    fetch(`https://${API_DOMAIN}/upload`, {
+    fetch(`${API_HOST}/upload`, {
       method: 'PUT',
       headers: {
         'custom-labels': customLabelText,
@@ -30,7 +30,7 @@ function App() {
   }
 
   const searchPhotos = () => {
-    fetch(`https://${API_DOMAIN}/search?q=${searchText}`, {
+    fetch(`${API_HOST}/search?q=${searchText}`, {
       method: 'GET',
       headers: {
         'Accept': 'application/json',
