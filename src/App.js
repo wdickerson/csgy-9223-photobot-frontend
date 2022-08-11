@@ -1,8 +1,33 @@
 import logo from './logo.svg';
 import './App.css';
+// import { Buffer } from 'buffer'
 import { useState } from 'react'
+// import { MicrophoneStream } from 'microphone-stream'
+// const micStream = require("microphone-stream");
+// const micStream = require("microphone-stream");
 
-const API_HOST = process.env.REACT_APP_PHOTOBOT_API_HOST;
+import {
+  TranscribeStreamingClient,
+  StartStreamTranscriptionCommand,
+} from "@aws-sdk/client-transcribe-streaming";
+
+const Buffer = require('buffer');
+
+const MicrophoneStream = require('microphone-stream').default;
+
+
+const client = new TranscribeStreamingClient({
+  region: 'us-east-1',
+  credentials: {
+    accessKeyId: 'val',
+    secretAccessKey: 'val',
+  },
+});
+
+
+
+const API_HOST = 'taco';
+// const API_HOST = process.env.REACT_APP_PHOTOBOT_API_HOST;
 
 function App() {
   const [customLabelText, setCustomLabelText] = useState('');
@@ -73,15 +98,141 @@ function App() {
     event.preventDefault();
   }
 
+
+
+
+
+  // console.log('HERE!!! devices')
+  // navigator.mediaDevices.getUserMedia({
+  //   audio: true,
+  //   video: false
+  // }).then(res => {
+  //   console.log(res)
+  //   res.start()
+  // });
+  
+  
+
+  // const micStream = require("microphone-stream");
+  // // this part should be put into an async function
+  // micStream.setStream(
+  //   await window.navigator.mediaDevices.getUserMedia({
+  //     video: false,
+  //     audio: true,
+  //   })
+  // );
+
+  // const audioStream = async function* () {
+  //   for await (const chunk of micStream) {
+  //     yield { AudioEvent: { AudioChunk: pcmEncodeChunk(chunk) /* pcm Encoding is optional depending on the source */ } };
+  //   }
+  // };
+
+
+  // const audioStream = async function* (device) {
+  //   await device.start();
+  //   while (device.ends !== true) {
+  //     const chunk = await device.read();
+  //     yield chunk; /* yield binary chunk */
+  //   }
+  // };
+  
+
+
+  // const command = new StartStreamTranscriptionCommand({
+  //   // The language code for the input audio. Valid values are en-GB, en-US, es-US, fr-CA, and fr-FR
+  //   LanguageCode: "en-US",
+  //   // The encoding used for the input audio. The only valid value is pcm.
+  //   MediaEncoding: "pcm",
+  //   // The sample rate of the input audio in Hertz. We suggest that you use 8000 Hz for low-quality audio and 16000 Hz for
+  //   // high-quality audio. The sample rate must match the sample rate in the audio file.
+  //   MediaSampleRateHertz: 44100,
+  //   AudioStream: audioStream(),
+  // });
+
+  // const myTestFunction = async () => {
+
+  // }
+
+  const myTranscribeFunciton = async () => {
+  // async function myTranscribeFunciton ()  {
+
+    console.log('HERE!!! in myTranscribeFunction')
+    
+    const micStream = new MicrophoneStream();
+
+    // micStream.on('data', function(chunk) {
+    //   // Optionally convert the Buffer back into a Float32Array
+    //   // (This actually just creates a new DataView - the underlying audio data is not copied or modified.)
+    //   // const raw = MicrophoneStream.toRaw(chunk)
+    //   // console.log(raw)
+  
+    //   // note: if you set options.objectMode=true, the `data` event will output AudioBuffers instead of Buffers
+    //  });
+
+    // this part should be put into an async function
+    micStream.setStream(
+      await window.navigator.mediaDevices.getUserMedia({
+        video: false,
+        audio: true,
+      })
+    );
+    const audioStream = async function* () {
+      for await (const chunk of micStream) {
+        yield { AudioEvent: { AudioChunk: pcmEncodeChunk(chunk) /* pcm Encoding is optional depending on the source */ } };
+      }
+    };
+    const pcmEncodeChunk = (chunk) => {
+      const input = micStream.toRaw(chunk);
+      var offset = 0;
+      var buffer = new ArrayBuffer(input.length * 2);
+      var view = new DataView(buffer);
+      for (var i = 0; i < input.length; i++, offset += 2) {
+        var s = Math.max(-1, Math.min(1, input[i]));
+        view.setInt16(offset, s < 0 ? s * 0x8000 : s * 0x7fff, true);
+      }
+      return Buffer.from(buffer);
+    };
+    const command = new StartStreamTranscriptionCommand({
+      // The language code for the input audio. Valid values are en-GB, en-US, es-US, fr-CA, and fr-FR
+      LanguageCode: "en-US",
+      // The encoding used for the input audio. The only valid value is pcm.
+      MediaEncoding: "pcm",
+      // The sample rate of the input audio in Hertz. We suggest that you use 8000 Hz for low-quality audio and 16000 Hz for
+      // high-quality audio. The sample rate must match the sample rate in the audio file.
+      MediaSampleRateHertz: 44100,
+      AudioStream: audioStream(),
+    });
+    const audResponse = await client.send(command);
+
+    console.log('HERE!!! audResponse')
+    console.log(audResponse)
+
+
+
+
+    // const response = await client.send(command);
+  }
+  
+
+
+
+
+
+
+
+
   return (
     <div className="App">
       <header className="App-header">
         <img src={logo} className="App-logo" alt="logo" />
         <p>
-          Store and access your photos. (pipeline via cloudformation 2!)
+          Store and access your photos.
         </p>
       </header>
       <h3>Upload a photo</h3>
+
+      <button onClick={myTranscribeFunciton}>TRANSCRIBE</button>
 
       <form onSubmit={handleUploadPhoto}>
         <label>
