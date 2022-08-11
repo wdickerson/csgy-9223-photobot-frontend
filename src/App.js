@@ -1,6 +1,6 @@
 import logo from './logo.svg';
 import './App.css';
-// import { Buffer } from 'buffer'
+import { Buffer } from 'buffer'
 import { useState } from 'react'
 // import { MicrophoneStream } from 'microphone-stream'
 // const micStream = require("microphone-stream");
@@ -11,7 +11,7 @@ import {
   StartStreamTranscriptionCommand,
 } from "@aws-sdk/client-transcribe-streaming";
 
-const Buffer = require('buffer');
+// const Buffer = require('buffer');
 
 const MicrophoneStream = require('microphone-stream').default;
 
@@ -177,13 +177,18 @@ function App() {
         audio: true,
       })
     );
+
     const audioStream = async function* () {
       for await (const chunk of micStream) {
+        // console.log('HERE!!! chunk');
+        // console.log(chunk);
         yield { AudioEvent: { AudioChunk: pcmEncodeChunk(chunk) /* pcm Encoding is optional depending on the source */ } };
       }
     };
+
     const pcmEncodeChunk = (chunk) => {
-      const input = micStream.toRaw(chunk);
+      const input = MicrophoneStream.toRaw(chunk);
+      // const input = micStream.toRaw(chunk);
       var offset = 0;
       var buffer = new ArrayBuffer(input.length * 2);
       var view = new DataView(buffer);
@@ -193,6 +198,7 @@ function App() {
       }
       return Buffer.from(buffer);
     };
+
     const command = new StartStreamTranscriptionCommand({
       // The language code for the input audio. Valid values are en-GB, en-US, es-US, fr-CA, and fr-FR
       LanguageCode: "en-US",
@@ -203,7 +209,31 @@ function App() {
       MediaSampleRateHertz: 44100,
       AudioStream: audioStream(),
     });
+
     const audResponse = await client.send(command);
+
+
+    for await (const event of audResponse.TranscriptResultStream) {
+      if (event.TranscriptEvent) {
+        const message = event.TranscriptEvent;
+        console.log('HERE!!! message');
+        console.log(message);
+
+        // Get multiple possible results
+        const results = event.TranscriptEvent.Transcript.Results;
+
+        // Print all the possible transcripts
+        results.map((result) => {
+          (result.Alternatives || []).map((alternative) => {
+            const transcript = alternative.Items.map((item) => item.Content).join(" ");
+            console.log('HERE!!! transcript');
+            console.log(transcript);
+          });
+        });
+
+      }
+    }
+
 
     console.log('HERE!!! audResponse')
     console.log(audResponse)
