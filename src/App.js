@@ -182,14 +182,18 @@ function App() {
       </header>
       <h3>Upload a photo</h3>
 
-      <form onSubmit={handleUploadPhoto}>
-        <label>
-          Custom labels (comma separated):&nbsp;
-          <input type="text" value={customLabelText} onChange={handleCustomLabelTextChange} />
+      <form id='upload-form' onSubmit={handleUploadPhoto}>
+        <label id='file-input-label' for='file-input'>
+          <span>Choose a photo</span>
+          <input 
+            id='file-input'
+            type="file" 
+            onChange={handleFileChange} 
+          />
         </label>
         <label>
-          Your photo:&nbsp;
-          <input type="file" onChange={handleFileChange} />
+          Add some labels
+          <input type="text" value={customLabelText} onChange={handleCustomLabelTextChange} />
         </label>
         <button type="submit">Upload</button>
       </form>

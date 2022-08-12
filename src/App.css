@@ -1,6 +1,43 @@
 .App {
+  /* display: flex; */
+  /* flex-direction: column; */
+  justify-content: center;
+  /* align-content: center; */
+  margin: 0px auto;
   text-align: center;
+  width: 500px;
+  align-items: center;
 }
+
+/* Extra small devices (phones, 600px and down) */
+@media only screen and (max-width: 600px) {
+  .App { width: 95vw }
+}
+
+/* Small devices (portrait tablets and large phones, 600px and up) */
+/* @media only screen and (min-width: 600px) {...} */
+@media only screen and (min-width: 600px) {
+  .App { width: 570px }
+}
+
+/* Medium devices (landscape tablets, 768px and up) */
+/* @media only screen and (min-width: 768px) {...} */
+@media only screen and (min-width: 768px) {
+  .App { width: 720px }
+}
+
+/* Large devices (laptops/desktops, 992px and up) */
+/* @media only screen and (min-width: 992px) {...} */
+@media only screen and (min-width: 992px) {
+  .App { width: 900px }
+}
+
+/* Extra large devices (large laptops and desktops, 1200px and up) */
+/* @media only screen and (min-width: 1200px) {...} */
+@media only screen and (min-width: 1200px) {
+  .App { width: 1000px }
+}
+
 
 .App-logo {
   height: 6vmin;
@@ -29,4 +66,33 @@
   to {
     transform: rotate(360deg);
   }
+}
+
+#upload-form {
+  display: flex;
+  flex-direction: column;
+  /* justify-content: center; */
+  align-items: center;
+  /* margin: 0px auto; */
+}
+
+#file-input-label {
+  border: 2px solid blue;
+  max-width: 120px;
+  height: 160px;
+  line-height: 160px;
+  text-align: center;
+  padding: 0 20px;
+  box-sizing: border-box;
+
+}
+
+span {
+  display: inline-block;
+  vertical-align: middle;
+  line-height: normal;
+}
+
+#file-input {
+  display: none;
 }
