@@ -1,7 +1,6 @@
-import logo from './logo.svg';
 import './App.css';
 import { Buffer } from 'buffer'
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { default as MicrophoneStream } from 'microphone-stream'
 import {
   TranscribeStreamingClient,
@@ -38,8 +37,15 @@ function App() {
   const [currentMicStream, setCurrentMicStream] = useState(null);
   const [disableMic, setDisableMic] = useState(false);
   const [searchPending, setSearchPending] = useState(false);
+  const [uploadPending, setUploadPending] = useState(false);
+  const [previewDataUrl, setPreviewDataUrl] = useState(null);
+  const fileInput = useRef();
+
+  const reader = new FileReader();
+  reader.onloadend = () => setPreviewDataUrl(reader.result);
 
   const uploadPhoto = () => {
+    setUploadPending(true);
     fetch(`${API_HOST}/upload`, {
       method: 'PUT',
       headers: {
@@ -47,12 +53,16 @@ function App() {
       },
       body: selectedFile
     }).then(res => res.text()).then((result) => {
-        console.log('HERE!!! done posting');
-        console.log(result);
+        fileInput.current.value = null;
+        setSelectedFile(null);
+        setPreviewDataUrl(null);
+        setUploadPending(false);
+        setCustomLabelText('');
       },
       (err) => {
         console.log('HERE!!! there was an error');
         console.log(err);
+        setUploadPending(false);
       }
     );
   }
@@ -69,8 +79,6 @@ function App() {
         'Accept': 'application/json',
       },
     }).then(res => res.json()).then((result) => {
-        console.log('HERE!!! fetched photos');
-        console.log(result);
         setFetchedPhotos(result);
         setSearchPending(false);
       },
@@ -83,14 +91,12 @@ function App() {
   }
 
   const handleFileChange = (event) => {
-    console.log('HERE!!! file change');
-    console.log(event.target.files[0]);
     setSelectedFile(event.target.files[0]);
+    reader.readAsDataURL(event.target.files[0]);
+    setCustomLabelText('');
   }
 
   const handleUploadPhoto = (event) => {
-    console.log('HERE!!!');
-    console.log(event.target.input);
     uploadPhoto();
     event.preventDefault();
   }
@@ -138,9 +144,7 @@ function App() {
     let transcript = '';
     for await (const event of audResponse.TranscriptResultStream) {
       if (event.TranscriptEvent) {
-        const message = event.TranscriptEvent;
-        // console.log('HERE!!! message');
-        // console.log(message);
+        // const message = event.TranscriptEvent;
 
         // Get multiple possible results
         const results = event.TranscriptEvent.Transcript.Results;
@@ -149,8 +153,6 @@ function App() {
         results.forEach((result) => {
           (result.Alternatives || []).forEach((alternative) => {
             transcript = alternative.Items.map((item) => item.Content).join(" ");
-            // console.log('HERE!!! transcript');
-            // console.log(transcript);
             setSearchText(transcript);
           });
         });
@@ -175,27 +177,31 @@ function App() {
   return (
     <div className="App">
       <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Store and access your photos.
-        </p>
+        <h1>
+          Photobot
+        </h1>
       </header>
       <h3>Upload a photo</h3>
 
       <form id='upload-form' onSubmit={handleUploadPhoto}>
-        <label id='file-input-label' for='file-input'>
-          <span>Choose a photo</span>
+        <label id='file-input-label' htmlFor='file-input'>
+          {
+            previewDataUrl 
+            ? <img id='preview-image' src={previewDataUrl} />
+            : <span>Choose a photo</span>
+          }
           <input 
+            ref={fileInput}
             id='file-input'
             type="file" 
             onChange={handleFileChange} 
           />
         </label>
         <label>
-          Add some labels
+          Add some labels:&nbsp;
           <input type="text" value={customLabelText} onChange={handleCustomLabelTextChange} />
         </label>
-        <button type="submit">Upload</button>
+        <button disabled={uploadPending || !selectedFile} type="submit">Upload</button>
       </form>
 
       <h3>-OR- Search for a label (ie, "dog")</h3>
@@ -204,7 +210,6 @@ function App() {
         <input 
           placeholder={!!currentMicStream ? 'Listening...' : 'Type here or click the microphone'}
           type="text" 
-          // type="submit"
           value={searchText} 
           onChange={handleSearchTextChange} 
         />
@@ -229,7 +234,7 @@ function App() {
       </form>
 
       <p>
-        Put a photo here or something
+        Results will appear here
       </p>
       <div>
         {
