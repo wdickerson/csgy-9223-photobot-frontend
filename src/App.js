@@ -6,6 +6,10 @@ import {
   TranscribeStreamingClient,
   StartStreamTranscriptionCommand,
 } from "@aws-sdk/client-transcribe-streaming";
+import mic from './mic.png';
+import stop from './stop.png';
+import ellipses from './ellipses.png';
+
 
 const client = new TranscribeStreamingClient({
   region: 'us-east-1',
@@ -35,7 +39,6 @@ function App() {
   const [selectedFile, setSelectedFile] = useState(null);
   const [fetchedPhotos, setFetchedPhotos] = useState([]);
   const [currentMicStream, setCurrentMicStream] = useState(null);
-  const [disableMic, setDisableMic] = useState(false);
   const [searchPending, setSearchPending] = useState(false);
   const [uploadPending, setUploadPending] = useState(false);
   const [previewDataUrl, setPreviewDataUrl] = useState(null);
@@ -152,7 +155,9 @@ function App() {
         // Print all the possible transcripts
         results.forEach((result) => {
           (result.Alternatives || []).forEach((alternative) => {
-            transcript = alternative.Items.map((item) => item.Content).join(" ");
+            transcript = alternative.Items.map(
+              (item) => item.Content
+            ).join(" ").replace(/\s\./g, '.').replace(/\s,/g, ',');
             setSearchText(transcript);
           });
         });
@@ -165,23 +170,19 @@ function App() {
   
   const myStopFunction = async () => {
     // add a little delay
-    setDisableMic(true);
     setSearchPending(true);
     setTimeout(() => {
       currentMicStream.stop()
       setCurrentMicStream(null);
-      setDisableMic(false);
     }, 2000)
   }
 
   return (
     <div className="App">
       <header className="App-header">
-        <h1>
-          Photobot
-        </h1>
+        <h1>Photobot</h1>
       </header>
-      <h3>Upload a photo</h3>
+      <h2>Upload a photo</h2>
 
       <form id='upload-form' onSubmit={handleUploadPhoto}>
         <label id='file-input-label' htmlFor='file-input'>
@@ -197,36 +198,59 @@ function App() {
             onChange={handleFileChange} 
           />
         </label>
-        <label>
-          Add some labels:&nbsp;
-          <input type="text" value={customLabelText} onChange={handleCustomLabelTextChange} />
+        <label id='label-input-label'>
+          <h4>Add some labels</h4>
+          <h5>Optional. Separate labels with commas.</h5>
+          <input 
+            type="text" 
+            id="label-input"
+            value={customLabelText} 
+            placeholder={"birthday, vacation, tacos"}
+            onChange={handleCustomLabelTextChange} 
+          />
         </label>
-        <button disabled={uploadPending || !selectedFile} type="submit">Upload</button>
+        <input 
+          disabled={uploadPending || !selectedFile} 
+          type="submit"
+          className="form-button"
+          value="Upload Photo"
+        />
       </form>
 
-      <h3>-OR- Search for a label (ie, "dog")</h3>
-      <form onSubmit={handleSearchPhotos}>
-        Search by label:&nbsp;
+      <h2>Search for photos</h2>
+      <form id='search-form' onSubmit={handleSearchPhotos}>
+        <div id="search-box">
+          <input 
+            id="search-input"
+            placeholder={!!currentMicStream ? 'Listening...' : 'Type here or click the microphone'}
+            type="text" 
+            value={searchText} 
+            onChange={handleSearchTextChange} 
+          />
+          {
+            !currentMicStream &&
+            <input 
+              className="audio-image"
+              src={mic}
+              type="image"
+              value="MIC"
+              disabled={searchPending} 
+              onClick={myTranscribeFunction}
+            />
+          }
+          {
+            currentMicStream &&
+            <input 
+              className="audio-image"
+              src={searchPending ? ellipses : stop}
+              type="image"
+              disabled={searchPending} 
+              onClick={myStopFunction}
+            />
+          }
+        </div>
         <input 
-          placeholder={!!currentMicStream ? 'Listening...' : 'Type here or click the microphone'}
-          type="text" 
-          value={searchText} 
-          onChange={handleSearchTextChange} 
-        />
-        <input 
-          type="button"
-          value="MIC"
-          disabled={searchPending || disableMic || !!currentMicStream} 
-          onClick={myTranscribeFunction}
-        >
-        </input>
-        <input 
-          type='button'
-          value="STOP"
-          disabled={searchPending || disableMic || !currentMicStream} 
-          onClick={myStopFunction}>
-        </input>
-        <input 
+          className="form-button"
           disabled={searchPending} 
           type="submit" 
           value={searchPending ? 'Searching...' : 'Search Photos'} 

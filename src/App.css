@@ -1,5 +1,6 @@
 :root {
   --color-blue-gray: rgb(199, 221, 239);
+  --color-gray: rgb(196, 204, 210);
 }
 
 .App {
@@ -42,34 +43,32 @@
   .App { width: 1000px }
 }
 
-
-.App-logo {
-  height: 6vmin;
-  pointer-events: none;
-}
-
 @media (prefers-reduced-motion: no-preference) {
   .App-logo {
     animation: App-logo-spin infinite 20s linear;
   }
 }
 
-.App-header {
-  min-height: 30vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
+h4 {
+  margin: 4px 0;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+h5 {
+  margin: 2px 0;
+  font-weight: 300;
+}
+
+#label-input-label {
+  width: 100%;
+  margin: 16px 0 4px;
+}
+
+#label-input {
+  border: 1px inset var(--color-gray);
+  height: 2em;
+  width: 70%;
+  max-width: 300px;
+  margin: 12px 0 0px;
 }
 
 #upload-form {
@@ -82,16 +81,16 @@
 #file-input-label {
   border: 1px solid var(--color-blue-gray);
   border-radius: 4px;
-  width: 180px;
-  height: 220px;
-  line-height: 220px;
+  width: 150px;
+  height: 180px;
+  line-height: 180px;
   text-align: center;
 }
 
 #preview-image {
   vertical-align: middle;
-  max-width: 180px;
-  max-height: 220px;
+  max-width: 150px;
+  max-height: 180px;
 }
 
 span {
@@ -103,4 +102,34 @@ span {
 
 #file-input {
   display: none;
+}
+
+#search-form {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+}
+
+#search-box {
+  height: 2em;
+  display: flex;
+  width: 80%;
+  max-width: 340px;
+  border: 1px inset var(--color-gray);
+}
+
+#search-input {
+  border: none;
+  flex: 1;
+}
+
+.audio-image {
+  padding: 6px;
+}
+
+.form-button {
+  width: 110px;
+  height: 2em;
 }
