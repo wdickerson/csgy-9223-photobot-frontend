@@ -1,13 +1,11 @@
 :root {
   --color-blue-gray: rgb(199, 221, 239);
   --color-gray: rgb(196, 204, 210);
+  --color-dark-gray: rgb(108, 124, 136);
 }
 
 .App {
-  /* display: flex; */
-  /* flex-direction: column; */
   justify-content: center;
-  /* align-content: center; */
   margin: 0px auto;
   text-align: center;
   width: 500px;
@@ -132,4 +130,28 @@ span {
 .form-button {
   width: 110px;
   height: 2em;
+}
+
+#results-list {
+  padding: 32px 0;
+  display: flex;
+  width: 100%;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+}
+
+.result {
+  display: table;
+}
+
+.result-image {
+  height: 200px;
+}
+
+.result-labels {
+  display: table-caption;
+  caption-side: bottom;
+  font-size: smaller;
+  color: var(--color-dark-gray);
 }

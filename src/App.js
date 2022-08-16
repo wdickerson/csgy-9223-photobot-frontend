@@ -37,7 +37,7 @@ function App() {
   const [customLabelText, setCustomLabelText] = useState('');
   const [searchText, setSearchText] = useState('');
   const [selectedFile, setSelectedFile] = useState(null);
-  const [fetchedPhotos, setFetchedPhotos] = useState([]);
+  const [fetchedPhotos, setFetchedPhotos] = useState(null);
   const [currentMicStream, setCurrentMicStream] = useState(null);
   const [searchPending, setSearchPending] = useState(false);
   const [uploadPending, setUploadPending] = useState(false);
@@ -63,7 +63,7 @@ function App() {
         setCustomLabelText('');
       },
       (err) => {
-        console.log('HERE!!! there was an error');
+        console.log('There was an error uploading');
         console.log(err);
         setUploadPending(false);
       }
@@ -81,12 +81,12 @@ function App() {
       headers: {
         'Accept': 'application/json',
       },
-    }).then(res => res.json()).then((result) => {
-        setFetchedPhotos(result);
+    }).then(res => res.json()).then((searchResponse) => {
+        setFetchedPhotos(searchResponse.results || []);
         setSearchPending(false);
       },
       (err) => {
-        console.log('HERE!!! there was an error searching');
+        console.log('There was an error searching');
         console.log(err);
         setSearchPending(false);     
       }
@@ -122,8 +122,6 @@ function App() {
     const micStream = new MicrophoneStream();
     setCurrentMicStream(micStream);
 
-    // this part should be put into an async function
-    // micStream.resume()
     micStream.setStream(
       await window.navigator.mediaDevices.getUserMedia({
         video: false,
@@ -147,8 +145,6 @@ function App() {
     let transcript = '';
     for await (const event of audResponse.TranscriptResultStream) {
       if (event.TranscriptEvent) {
-        // const message = event.TranscriptEvent;
-
         // Get multiple possible results
         const results = event.TranscriptEvent.Transcript.Results;
 
@@ -169,7 +165,7 @@ function App() {
   }
   
   const myStopFunction = async () => {
-    // add a little delay
+    // add a little delay before cutting off the mic
     setSearchPending(true);
     setTimeout(() => {
       currentMicStream.stop()
@@ -229,40 +225,40 @@ function App() {
           />
           {
             !currentMicStream &&
-            <input 
+            <img 
               className="audio-image"
               src={mic}
-              type="image"
-              value="MIC"
-              disabled={searchPending} 
-              onClick={myTranscribeFunction}
+              onClick={searchPending ? () => {} : myTranscribeFunction}
             />
           }
           {
             currentMicStream &&
-            <input 
+            <img 
               className="audio-image"
               src={searchPending ? ellipses : stop}
-              type="image"
-              disabled={searchPending} 
-              onClick={myStopFunction}
+              onClick={searchPending ? () => {} : myStopFunction}
             />
           }
         </div>
         <input 
           className="form-button"
-          disabled={searchPending} 
+          disabled={currentMicStream || searchPending} 
           type="submit" 
           value={searchPending ? 'Searching...' : 'Search Photos'} 
         />
       </form>
-
-      <p>
-        Results will appear here
-      </p>
-      <div>
+      { fetchedPhotos === null && <p>Results will appear here</p> }
+      { fetchedPhotos && fetchedPhotos.length == 0 && !searchPending && <p>No results found.</p> }
+      <div id='results-list'>
         {
-          fetchedPhotos.map(photo => <img height="200px" src={photo.url} key={photo.url} />)
+          fetchedPhotos && fetchedPhotos.map((photo, i) => (
+              <div className='result-table' key={i}>
+                <div className='result'>
+                  <img className='result-image' src={photo.url} />
+                  <div className='result-labels'>{photo.labels.join(', ')}</div>
+                </div>
+              </div>
+          ))
         }
       </div>
     </div>
