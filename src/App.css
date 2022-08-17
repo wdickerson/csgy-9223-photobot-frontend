@@ -146,7 +146,8 @@ span {
 }
 
 .result-image {
-  height: 200px;
+  max-height: 200px;
+  max-width: 100%;
 }
 
 .result-labels {
